@@ -9,7 +9,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
-	"github.com/divideandconquer/go-consul-client/src/client"
+	"github.com/divideandconquer/go-consul-client/src/config"
 )
 
 // awsLoader satisfies the Loader interface in go-consul-client
@@ -22,7 +22,7 @@ type awsLoader struct {
 
 // NewAWSLoader creates a Loader that will cache the provided namespace on initialization
 // and return data from that cache on Get
-func NewAWSLoader(environment, serviceName string) client.Loader {
+func NewAWSLoader(environment, serviceName string) config.Loader {
 	ret := &awsLoader{
 		environment: environment,
 		serviceName: serviceName,

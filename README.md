@@ -1,6 +1,6 @@
 # go-aws-config
 
-This package is an AWS parameter store implementation the config `client.Loader` interface described [here](https://github.com/divideandconquer/go-consul-client/blob/master/src/client/client.go#L16).
+This package is an AWS parameter store implementation the config `config.Loader` interface described [here](https://github.com/divideandconquer/go-consul-client/blob/master/src/config/loader.go).
 
 ## Usage
 
