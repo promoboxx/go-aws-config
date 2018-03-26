@@ -92,6 +92,24 @@ func (a *awsLoader) pullConfigWithPrefix(prefix string, nextToken *string) (map[
 	return result, nil
 }
 
+// Put a value to a key
+func (a *awsLoader) Put(key string, value []byte) error {
+
+	putParamInput := &ssm.PutParameterInput{
+		Name:  aws.String(key),
+		Type:  aws.String(ssm.ParameterTypeSecureString),
+		Value: aws.String(string(value)),
+	}
+
+	// PutParamter returns the version number of the param, which is not useful
+	_, err := a.client.PutParameter(putParamInput)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
 // Get fetches the raw config from the environment
 func (a *awsLoader) Get(key string) ([]byte, error) {
 	val, ok := a.config[key]
