@@ -94,9 +94,10 @@ func (a *awsLoader) pullConfigWithPrefix(prefix string, nextToken *string) (map[
 
 // Put a value to a key
 func (a *awsLoader) Put(key string, value []byte) error {
+	fullKey := fmt.Sprintf("/%s/%s/%s", a.environment, a.serviceName, key)
 
 	putParamInput := &ssm.PutParameterInput{
-		Name:  aws.String(key),
+		Name:  aws.String(fullKey),
 		Type:  aws.String(ssm.ParameterTypeSecureString),
 		Value: aws.String(string(value)),
 	}
