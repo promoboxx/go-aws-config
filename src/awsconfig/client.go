@@ -97,9 +97,10 @@ func (a *awsLoader) Put(key string, value []byte) error {
 	fullKey := fmt.Sprintf("/%s/%s/%s", a.environment, a.serviceName, key)
 
 	putParamInput := &ssm.PutParameterInput{
-		Name:  aws.String(fullKey),
-		Type:  aws.String(ssm.ParameterTypeSecureString),
-		Value: aws.String(string(value)),
+		Name:      aws.String(fullKey),
+		Type:      aws.String(ssm.ParameterTypeSecureString),
+		Value:     aws.String(string(value)),
+		Overwrite: aws.Bool(true),
 	}
 
 	// PutParamter returns the version number of the param, which is not useful
