@@ -42,11 +42,14 @@ func (a *awsLoader) Import(data []byte) error {
 	}
 
 	for k, v := range conf {
-		if v != nil && len(*v) > 0 {
+		if v != nil {
 			// strings will be wrapped in quotes; remove them.
+
 			value := *v
-			if value[0] == '"' && value[len(value)-1] == '"' {
-				value = value[1 : len(value)-1]
+			if len(value) > 0 {
+				if value[0] == '"' && value[len(value)-1] == '"' {
+					value = value[1 : len(value)-1]
+				}
 			}
 			err = a.Put(k, value)
 			if err != nil {
