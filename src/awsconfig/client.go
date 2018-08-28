@@ -1,6 +1,7 @@
 package awsconfig
 
 import (
+	"encoding/json"
 	"fmt"
 	"strconv"
 	"strings"
@@ -32,8 +33,27 @@ func NewAWSLoader(environment, serviceName string) config.Loader {
 	return ret
 }
 
-// Import does nothing for the aws loader
+// Import loads key values into parameter store at /env/serviceName/key
 func (a *awsLoader) Import(data []byte) error {
+	conf := make(map[string]*json.RawMessage)
+	err := json.Unmarshal(data, &conf)
+	if err != nil {
+		return fmt.Errorf("Unable to parse json data: %v", err)
+	}
+
+	for k, v := range conf {
+		if v != nil && len(*v) > 0 {
+			// strings will be wrapped in quotes; remove them.
+			value := *v
+			if value[0] == '"' && value[len(value)-1] == '"' {
+				value = value[1 : len(value)-1]
+			}
+			err = a.Put(k, value)
+			if err != nil {
+				return fmt.Errorf("Error writing key (%s) to parameter store: %v", k, err)
+			}
+		}
+	}
 	return nil
 }
 
