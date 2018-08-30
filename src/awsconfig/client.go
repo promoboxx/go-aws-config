@@ -47,8 +47,8 @@ func (a *awsLoader) Import(data []byte) error {
 
 			value := *v
 			// Parameter store doesn't allow storing empty strings.  We store a space and it will be stripped during Initialize()
-			if value = `""` {
-				value = `" "`
+			if string(value) == `""` {
+				value = json.RawMessage(`" "`)
 			}
 			if len(value) > 0 {
 				if value[0] == '"' && value[len(value)-1] == '"' {
