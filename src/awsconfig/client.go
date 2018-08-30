@@ -46,6 +46,10 @@ func (a *awsLoader) Import(data []byte) error {
 			// strings will be wrapped in quotes; remove them.
 
 			value := *v
+			// Parameter store doesn't allow storing empty strings.  We store a space and it will be stripped during Initialize()
+			if value = `""` {
+				value = `" "`
+			}
 			if len(value) > 0 {
 				if value[0] == '"' && value[len(value)-1] == '"' {
 					value = value[1 : len(value)-1]
