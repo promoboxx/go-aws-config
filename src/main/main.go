@@ -6,7 +6,7 @@ import (
 	"log"
 	"os"
 
-	"github.com/healthimation/go-aws-config/src/awsconfig"
+	"github.com/promoboxx/go-aws-config/src/awsconfig"
 )
 
 var filepath = flag.String("file", "", "the path to the json file")
