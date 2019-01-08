@@ -1,0 +1,9 @@
+{
+    "config_key": "value",
+    "a_boolean_value": true,
+    "a_duration_value": "1m",
+    "complex_json": {
+        "more": "config",
+        "goes": "here"
+    }
+}

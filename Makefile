@@ -63,3 +63,10 @@ vendor-missing: ## updates your project to get all missing dependencies
 .PHONY: vet
 vet: ## verify `go vet` passes.
 	@go vet $(shell go list ./... | grep -v vendor) | tee /dev/stderr
+
+.PHONY: run
+run: ## run the CLI tool
+	@[ "${env}" ] || ( echo ">> env is not set"; exit 1 )
+	@[ "${srv}" ] || ( echo ">> srv is not set"; exit 1 )
+	@[ "${file}" ] || ( echo ">> file is not set"; exit 1 )
+	@docker run -it -e AWS_SESSION_TOKEN=$(AWS_SESSION_TOKEN) -e AWS_ACCESS_KEY_ID=$(AWS_ACCESS_KEY_ID) -e AWS_SECRET_ACCESS_KEY=$(AWS_SECRET_ACCESS_KEY) -e AWS_REGION=us-east-1 -v $(file):/config.json pbxx/go-aws-config:99f4469 -file /config.json  -env $(env) -service $(srv)
