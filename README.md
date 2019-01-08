@@ -54,5 +54,5 @@ The above file would result in 4 keys being upserted into parameter store within
 
 ```bash
 # this command will load the config from example.json into the namespace for the local environment's example service
-aws-vault exec pbxx-dev make run env=local srv=example file=$(pwd)/example.json
+aws-vault exec pbxx-dev -- make run env=local srv=example file=$(pwd)/example.json
 ```
