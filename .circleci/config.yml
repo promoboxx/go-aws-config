@@ -1,0 +1,65 @@
+version: 2.1
+
+jobs:
+  test:
+    docker:
+      - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/promoboxx/go-aws-config
+    steps:
+      - checkout
+      - run:
+          name: golint
+          command: |
+            go get -u github.com/golang/lint/golint
+            golint ./src/...
+      - run:
+          name: go vet
+          command: go vet ./src/...
+      - run:
+          name: gofmt
+          command: test -z "$(gofmt -s -l src)"
+      - run:
+          name: go test
+          command: go test -v -cover -run Unit ./...
+  build:
+    docker:
+      - image: circleci/golang:1.11
+    working_directory: /go/src/github.com/promoboxx/go-aws-config
+    steps:
+      - checkout
+      - run:
+          name: build example-service
+          command: |
+            go build src/main/*.go
+  build_and_push:
+    docker:
+      - image: docker:stable-git
+    steps:
+      - checkout
+      - setup_remote_docker:
+          docker_layer_caching: true
+      - run: |
+          docker login -u "$DOCKER_LOGIN" -p "$DOCKER_PASSWORD"
+          docker build -t pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} .
+          docker tag pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1} pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
+          docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_SHA1}
+          docker push pbxx/${CIRCLE_PROJECT_REPONAME}:${CIRCLE_BRANCH}-latest
+  
+workflows:
+  version: 2
+  build_and_publish_docker_image:
+    jobs:
+      - build:
+          filters:
+            branches:
+              ignore: master
+      - test:
+          filters:
+            branches:
+              ignore: master
+      - build_and_push:
+          context: "dockerhub"
+          requires:
+            - build
+            - test
+  
