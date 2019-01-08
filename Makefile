@@ -26,10 +26,6 @@ build-native: ## run go build for current OS
 docker-build: ## build docker image
 	docker build -t $(REGISTRY)/$(SERVICE):$(COMMIT) $(DOCKER_BUILD_ARGS) .
 
-.PHONY: docker-push
-docker-push: ## push docker image to Docker Hub
-	docker push $(REGISTRY)/$(SERVICE):$(COMMIT)
-
 .PHONY: fmt
 fmt: ## verify all files have been `gofmt`ed.
 	@gofmt -s -l . | grep -v vendor | tee /dev/stderr
@@ -41,10 +37,6 @@ generate: ## runs go generate to create mocks or any other automatically generat
 .PHONY: lint
 lint: ## verify `golint` passes.
 	@golint ./... | grep -v vendor | tee /dev/stderr
-
-.PHONY: logs
-logs: ## get the logs of a service ex `make logs service_name=<my_service_name>`
-	docker-compose logs $(service_name)
 
 .PHONY: test
 test: ## run the go tests.
