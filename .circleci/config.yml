@@ -28,7 +28,7 @@ jobs:
     steps:
       - checkout
       - run:
-          name: build example-service
+          name: build go-aws-config
           command: |
             go build src/main/*.go
   build_and_push:
