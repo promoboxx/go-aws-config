@@ -3,7 +3,7 @@ package awsconfig
 import "testing"
 import "time"
 
-func TestUnit_Initialize(t *testing.T) {
+func TestIntegration_Initialize(t *testing.T) {
 	c := NewAWSLoader("dev", "test")
 
 	err := c.Initialize()
@@ -13,7 +13,7 @@ func TestUnit_Initialize(t *testing.T) {
 	}
 }
 
-func TestUnit_MustGetString(t *testing.T) {
+func TestIntegration_MustGetString(t *testing.T) {
 	c := NewAWSLoader("dev", "test")
 	err := c.Initialize()
 	if err != nil {
@@ -25,7 +25,7 @@ func TestUnit_MustGetString(t *testing.T) {
 	}
 }
 
-func TestUnit_MustGetBool(t *testing.T) {
+func TestIntegration_MustGetBool(t *testing.T) {
 	c := NewAWSLoader("dev", "test")
 	err := c.Initialize()
 	if err != nil {
@@ -41,7 +41,7 @@ func TestUnit_MustGetBool(t *testing.T) {
 	}
 }
 
-func TestUnit_MustGetInt(t *testing.T) {
+func TestIntegration_MustGetInt(t *testing.T) {
 	c := NewAWSLoader("dev", "test")
 	err := c.Initialize()
 	if err != nil {
@@ -53,7 +53,7 @@ func TestUnit_MustGetInt(t *testing.T) {
 	}
 }
 
-func TestUnit_MustGetDuration(t *testing.T) {
+func TestIntegration_MustGetDuration(t *testing.T) {
 	c := NewAWSLoader("dev", "test")
 	err := c.Initialize()
 	if err != nil {
