@@ -3,6 +3,7 @@ package awsconfig
 import (
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -66,17 +67,46 @@ func (a *awsLoader) Import(data []byte) error {
 
 // Initialize
 func (a *awsLoader) Initialize() error {
-	// pull all the config down for this service
-	prefix := "/" + a.environment + "/" + a.serviceName + "/"
-	globalPrefix := "/" + a.environment + "/global/"
-	var err error
+	env := a.environment
 
-	a.config, err = a.pullConfigWithPrefix(globalPrefix, nil) // pull global config
+	// pull all the config down for this service
+
+	// get the env config
+	prefix := "/" + env + "/" + a.serviceName + "/"
+
+	serviceConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config
 	if err != nil {
 		return err
 	}
 
-	serviceConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config
+	// if the environment name is the same as the $USER
+	// then we want to merge that with everything that
+	// is in local/<service_name> then merge again
+	// with everything in local/global
+	if a.environment == os.Getenv("USER") {
+		// if the environment is the user then we still
+		// want to get the config for the local env
+		env = "local"
+
+		// get the local config
+		prefix = "/" + env + "/" + a.serviceName + "/"
+
+		localConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config in the local env
+		if err != nil {
+			return err
+		}
+
+		// merge it with the service config
+		for k, v := range serviceConfig {
+			localConfig[k] = v
+		}
+
+		serviceConfig = localConfig
+	}
+
+	globalPrefix := "/" + env + "/global/"
+
+	a.config, err = a.pullConfigWithPrefix(globalPrefix, nil) // pull global config
 	if err != nil {
 		return err
 	}
