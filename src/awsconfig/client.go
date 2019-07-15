@@ -83,34 +83,34 @@ func (a *awsLoader) Initialize() error {
 	// then we want to merge that with everything that
 	// is in local/<service_name> then merge again
 	// with everything in local/global
-	if a.environment == os.Getenv("USER") {
+	if a.environment == "local" {
 		// if the environment is the user then we still
 		// want to get the config for the local env
-		env = "local"
+		env = os.Getenv("CONFIG_USER")
 
 		// get the local config
 		prefix = "/" + env + "/" + a.serviceName + "/"
 
-		localConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config in the local env
+		userConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config in the local env
 		if err != nil {
 			return err
 		}
 
 		// merge it with the service config
-		for k, v := range serviceConfig {
-			localConfig[k] = v
+		for k, v := range userConfig {
+			serviceConfig[k] = v
 		}
-
-		serviceConfig = localConfig
 	}
 
 	globalPrefix := "/" + env + "/global/"
 
+	// get the global config
 	a.config, err = a.pullConfigWithPrefix(globalPrefix, nil) // pull global config
 	if err != nil {
 		return err
 	}
 
+	// merge it with the service config
 	for k, v := range serviceConfig {
 		a.config[k] = v
 	}
