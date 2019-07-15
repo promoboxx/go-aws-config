@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
 	"github.com/divideandconquer/go-consul-client/src/config"
@@ -32,6 +33,25 @@ func NewAWSLoader(environment, serviceName string) config.Loader {
 	}
 	ret.client = ssm.New(session.Must(session.NewSession()))
 	return ret
+}
+
+// NewAWSLoaderFromRole will return a new loader using the role provided to genereate credentials for Amazon
+func NewAWSLoaderFromRole(environment string, serviceName string, roleARN string, externalID string, sessionName string, duration time.Duration) config.Loader {
+	sess := session.Must(session.NewSession())
+	creds := stscreds.NewCredentials(sess, roleARN, func(p *stscreds.AssumeRoleProvider) {
+		p.ExternalID = &externalID
+		p.RoleSessionName = sessionName
+		p.Duration = duration
+	})
+
+	client := ssm.New(session.Must(session.NewSessionWithOptions(session.Options{Config: aws.Config{Credentials: creds}})))
+
+	return &awsLoader{
+		environment: environment,
+		serviceName: serviceName,
+		config:      make(map[string]string),
+		client:      client,
+	}
 }
 
 // Import loads key values into parameter store at /env/serviceName/key
