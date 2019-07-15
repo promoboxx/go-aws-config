@@ -67,29 +67,20 @@ func (a *awsLoader) Import(data []byte) error {
 
 // Initialize
 func (a *awsLoader) Initialize() error {
-	env := a.environment
-
-	// pull all the config down for this service
-
-	// get the env config
-	prefix := "/" + env + "/" + a.serviceName + "/"
+	// get the env config for the service
+	prefix := "/" + a.environment + "/" + a.serviceName + "/"
 
 	serviceConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config
 	if err != nil {
 		return err
 	}
 
-	// if the environment name is the same as the $USER
-	// then we want to merge that with everything that
-	// is in local/<service_name> then merge again
-	// with everything in local/global
+	// if the envoronment is local then we want to
+	// get the config of the $CONFIG_USER as well and merge
+	// that with the service config from above
 	if a.environment == "local" {
-		// if the environment is the user then we still
-		// want to get the config for the local env
-		env = os.Getenv("CONFIG_USER")
-
-		// get the local config
-		prefix = "/" + env + "/" + a.serviceName + "/"
+		// get the user config
+		prefix = "/" + os.Getenv("CONFIG_USER") + "/" + a.serviceName + "/"
 
 		userConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config in the local env
 		if err != nil {
@@ -102,9 +93,9 @@ func (a *awsLoader) Initialize() error {
 		}
 	}
 
-	globalPrefix := "/" + env + "/global/"
-
 	// get the global config
+	globalPrefix := "/" + a.environment + "/global/"
+
 	a.config, err = a.pullConfigWithPrefix(globalPrefix, nil) // pull global config
 	if err != nil {
 		return err
