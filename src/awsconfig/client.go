@@ -3,6 +3,7 @@ package awsconfig
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -100,7 +101,12 @@ func (a *awsLoader) Initialize() error {
 	// that with the service config from above
 	if a.environment == "local" {
 		// get the user config
-		prefix = "/" + os.Getenv("CONFIG_USER") + "/" + a.serviceName + "/"
+		configUser := os.Getenv("CONFIG_USER")
+		if configUser == "" {
+			log.Fatalf("env variable `CONFIG_USER` was not set")
+		}
+
+		prefix = "/" + configUser + "/" + a.serviceName + "/"
 
 		userConfig, err := a.pullConfigWithPrefix(prefix, nil) // pull service specific config in the local env
 		if err != nil {
