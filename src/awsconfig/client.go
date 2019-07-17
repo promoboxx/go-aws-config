@@ -38,7 +38,9 @@ func NewAWSLoader(environment, serviceName string) config.Loader {
 func NewAWSLoaderFromRole(environment string, serviceName string, roleARN string, externalID string, sessionName string, duration time.Duration) config.Loader {
 	sess := session.Must(session.NewSession())
 	creds := stscreds.NewCredentials(sess, roleARN, func(p *stscreds.AssumeRoleProvider) {
-		p.ExternalID = &externalID
+		if externalID != "" {
+			p.ExternalID = &externalID
+		}
 		p.RoleSessionName = sessionName
 		p.Duration = duration
 	})
