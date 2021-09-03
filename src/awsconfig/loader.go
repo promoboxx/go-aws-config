@@ -22,4 +22,5 @@ type Loader interface {
 	MustGetPublicKey(key string) *rsa.PublicKey
 	MustGetPrivateKey(key string) *rsa.PrivateKey
 	MustGetCertificate(certKey string, privKeyKey string) *tls.Certificate
+	MustGetEnv(key string) string
 }

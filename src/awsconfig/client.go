@@ -5,6 +5,7 @@ import (
 	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -264,4 +265,13 @@ func (a *awsLoader) MustGetCertificate(certKey string, privKeyKey string) *tls.C
 	}
 
 	return &cert
+}
+
+func (a *awsLoader) MustGetEnv(key string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		panic(fmt.Sprintf("[%s] Could not fetch environment variable (%s)", a.serviceName, key))
+	}
+
+	return val
 }
