@@ -1,8 +1,11 @@
-package config
+package awsconfig
 
-import "time"
+import (
+	"crypto/rsa"
+	"crypto/tls"
+	"time"
+)
 
-// Loader is a object that can import, initialize, and Get config values
 type Loader interface {
 	Import(data []byte) error
 	Initialize() error
@@ -15,6 +18,9 @@ type Loader interface {
 	MustGetBool(key string) bool
 	MustGetInt(key string) int
 	MustGetDuration(key string) time.Duration
-
-	//TODO add array support?
+	MustGetObject(key string, obj interface{})
+	MustGetPublicKey(key string) *rsa.PublicKey
+	MustGetPrivateKey(key string) *rsa.PrivateKey
+	MustGetCertificate(certKey string, privKeyKey string) *tls.Certificate
+	MustGetEnv(key string) string
 }

@@ -1,8 +1,11 @@
 package awsconfig
 
 import (
+	"crypto/rsa"
+	"crypto/tls"
 	"encoding/json"
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -11,6 +14,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws/credentials/stscreds"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/ssm"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/divideandconquer/go-consul-client/src/config"
 )
 
@@ -24,7 +28,7 @@ type awsLoader struct {
 
 // NewAWSLoader creates a Loader that will cache the provided namespace on initialization
 // and return data from that cache on Get
-func NewAWSLoader(environment, serviceName string) config.Loader {
+func NewAWSLoader(environment, serviceName string) Loader {
 	ret := &awsLoader{
 		environment: environment,
 		serviceName: serviceName,
@@ -207,4 +211,67 @@ func (a *awsLoader) MustGetDuration(key string) time.Duration {
 		panic(fmt.Sprintf("[%s] Could not parse config (%s) into a duration: %v", a.serviceName, key, err))
 	}
 	return ret
+}
+
+func (a *awsLoader) MustGetObject(key string, obj interface{}) {
+	val, err := a.Get(key)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not fetch config (%s): %v", a.serviceName, key, err))
+	}
+	err = json.Unmarshal(val, obj)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not parse config (%s) into a json object: %v", a.serviceName, key, err))
+	}
+}
+
+func (a *awsLoader) MustGetPublicKey(key string) *rsa.PublicKey {
+	val, err := a.Get(key)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not fetch config (%s): %v", a.serviceName, key, err))
+	}
+	pubKey, err := jwt.ParseRSAPublicKeyFromPEM(val)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not parse config (%s) into a public key: %v", a.serviceName, key, err))
+	}
+	return pubKey
+}
+
+func (a *awsLoader) MustGetPrivateKey(key string) *rsa.PrivateKey {
+	val, err := a.Get(key)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not fetch config (%s): %v", a.serviceName, key, err))
+	}
+	privKey, err := jwt.ParseRSAPrivateKeyFromPEM(val)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not parse config (%s) into a private key: %v", a.serviceName, key, err))
+	}
+	return privKey
+}
+
+func (a *awsLoader) MustGetCertificate(certKey string, privKeyKey string) *tls.Certificate {
+	certBytes, err := a.Get(certKey)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not fetch config (%s): %v", a.serviceName, certKey, err))
+	}
+
+	privKeyBytes, err := a.Get(privKeyKey)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not fetch config (%s): %v", a.serviceName, privKeyKey, err))
+	}
+
+	cert, err := tls.X509KeyPair(certBytes, privKeyBytes)
+	if err != nil {
+		panic(fmt.Sprintf("[%s] Could not parse config (%s) into a certificate: %v", a.serviceName, certKey, err))
+	}
+
+	return &cert
+}
+
+func (a *awsLoader) MustGetEnv(key string) string {
+	val, ok := os.LookupEnv(key)
+	if !ok {
+		panic(fmt.Sprintf("[%s] Could not fetch environment variable (%s)", a.serviceName, key))
+	}
+
+	return val
 }
